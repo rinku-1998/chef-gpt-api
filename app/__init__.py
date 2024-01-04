@@ -7,7 +7,7 @@ from app.cors_middleware import add_cors_middleware
 def create_app() -> FastAPI:
 
     # 1. 建立物件
-    app = FastAPI()
+    app = FastAPI(title='Chef GPT API', version='0.1.0')
 
     # 2. 路由
     from app.router.user_router import router as user_router

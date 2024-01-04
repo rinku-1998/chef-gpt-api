@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-router = APIRouter()
+router = APIRouter(tags=['user'])
 
 
 @router.post('/registrations', response_model=BaseRes[RegistrationRes])
