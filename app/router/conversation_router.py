@@ -18,7 +18,7 @@ from fastapi import APIRouter, Header, Depends
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-router = APIRouter()
+router = APIRouter(tags=['conversation'])
 
 
 @router.get('/conversations', response_model=BaseRes[ConversationPageRes])
@@ -90,11 +90,15 @@ def delete_conversation(conversation_id: int,
     if conversation_query.user_id != user_id:
         raise ItemNotExistException
 
-    # 4. 刪除資料
+    # 4. 刪除訊息資料
+    session.query(MessageEntity).filter_by(conversation_id=conversation_id).delete()
+    session.commit()
+
+    # 5. 刪除對話資料
     session.delete(conversation_query)
     session.commit()
 
-    # 5. 整理資料
+    # 6. 整理資料
     res = BaseRes()
 
     return res
