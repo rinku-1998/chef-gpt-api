@@ -1,10 +1,11 @@
 from app.enum.status_msg import StatusMsg
+from app.exception.db_exception import ItemNotExistException
 from app.exception.user_exception import UserExistException, UserNotExistException
 from app.exception.password_exception import PasswordNotStrongException, WrongPasswordException
 from app.exception.token_exception import TokenNotExistException, MissingTokenException
 from app.model.base_res import BaseRes
-from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -89,6 +90,25 @@ def attach_exception_handlers(app: FastAPI) -> FastAPI:
         res = BaseRes(msg=StatusMsg.TOKEN_MISSING.value)
 
         return JSONResponse(jsonable_encoder(res), status_code=401)
+
+    # 物件不存在
+    @app.exception_handler(ItemNotExistException)
+    async def item_not_exist_exception_handler(
+            request: Request,
+            exception: ItemNotExistException) -> JSONResponse:
+
+        res = BaseRes(msg=StatusMsg.ITEM_NOT_EXIST.value)
+
+        return JSONResponse(jsonable_encoder(res), status_code=400)
+
+    # 404
+    @app.exception_handler(status.HTTP_404_NOT_FOUND)
+    async def page_not_found_exception_handler(
+            request: Request, exception: HTTPException) -> JSONResponse:
+
+        res = BaseRes(msg=StatusMsg.PAGE_NOT_FOUND.value)
+
+        return JSONResponse(jsonable_encoder(res), status_code=404)
 
     # 全局例外
     @app.exception_handler(Exception)

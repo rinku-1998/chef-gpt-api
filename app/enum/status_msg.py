@@ -7,8 +7,7 @@ class StatusMsg(Enum):
     SUCCESS: str = '操作成功'
 
     # 400
-    INSERT_ERROR: str = '新增資料失敗'
-    DELETE_ERROR: str = '刪除資料失敗'
+    ITEM_NOT_EXIST: str = '物件不存在'
     USER_EXIST: str = '使用者已存在'
     USER_NOT_EXIST: str = '使用者已存在'
     PASSWORD_NOT_STRONG: str = '密碼強度不足'

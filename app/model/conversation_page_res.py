@@ -1,5 +1,5 @@
-from model.conversation_res import ConversationRes
-from model.page_res import PageRes
+from app.model.conversation_res import ConversationRes
+from app.model.page_res import PageRes
 from pydantic import BaseModel
 
 
