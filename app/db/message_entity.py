@@ -9,5 +9,5 @@ class MessageEntity(BaseEntity):
     id = Column(Integer, primary_key=True, autoincrement=True)  # 訊息 ID
     conversation_id = Column(Integer, nullable=False)  # 對話 ID
     role_id = Column(String(3), nullable=False)  # 角色 ID
-    Content = Column(Text, nullable=False)  # 內容
+    content = Column(Text, nullable=False)  # 內容
     create_time = Column(DateTime, nullable=False)  # 建立時間

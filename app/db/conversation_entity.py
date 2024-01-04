@@ -6,6 +6,7 @@ class ConversationEntity(BaseEntity):
 
     __tablename__ = 'conversation'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # 使用者 ID
+    id = Column(Integer, primary_key=True, autoincrement=True)  # 對話 ID
+    user_id = Column(Integer, nullable=False) # 使用者 ID
     title = Column(String(128), nullable=False)  # 對話標題
     create_time = Column(DateTime, nullable=False)  # 建立時間
