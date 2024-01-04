@@ -1,4 +1,4 @@
-from app.extension import SessionLocal
+from app import SessionLocal
 
 
 def get_session() -> SessionLocal:
