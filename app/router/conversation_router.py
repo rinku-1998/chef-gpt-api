@@ -10,6 +10,7 @@ from app.model.message_req import MessageReq
 from app.model.message_res import MessageRes
 from app.model.message_page_res import MessagePageRes
 from app.model.message_qa_res import MessageQARes
+from app.model.title_res import TitleRes
 from app.model.page_res import PageRes
 from app.helper.db_helper import get_session
 from app.service import user_service
@@ -91,7 +92,8 @@ def delete_conversation(conversation_id: int,
         raise ItemNotExistException
 
     # 4. 刪除訊息資料
-    session.query(MessageEntity).filter_by(conversation_id=conversation_id).delete()
+    session.query(MessageEntity).filter_by(
+        conversation_id=conversation_id).delete()
     session.commit()
 
     # 5. 刪除對話資料
@@ -100,6 +102,31 @@ def delete_conversation(conversation_id: int,
 
     # 6. 整理資料
     res = BaseRes()
+
+    return res
+
+
+@router.get('/titles/{conversation_id}', response_model=BaseRes[TitleRes])
+def get_title(conversation_id: int,
+              token: Annotated[str | None, Header()] = None,
+              session: Session = Depends(get_session)):
+
+    # 1. 查詢使用者
+    user_id = user_service.get_user(token, session)
+
+    # 2. 查詢對話 ID 是否為同一個使用者
+    conversation_query = session.query(ConversationEntity).filter_by(
+        id=conversation_id).first()
+    if not conversation_query:
+        raise ItemNotExistException
+
+    # TODO: 未來可以考慮是否要加一個操作非自己物件的例外
+    if conversation_query.user_id != user_id:
+        raise ItemNotExistException
+
+    # 3. 查詢標題
+    title_res = TitleRes(title=conversation_query.title)
+    res = BaseRes(data=title_res)
 
     return res
 
@@ -180,17 +207,20 @@ def create_message(req: MessageReq,
                                content='AI 回覆測試訊息',
                                create_time=time_util.current_time())
 
-    # 8. 寫入資料庫
+    # 6. 產生標題
+    pass
+
+    # 7. 寫入資料庫
     session.add_all([message_user, message_ai])
     session.commit()
     session.refresh(message_user)
     session.refresh(message_ai)
 
-    # 9. 查詢角色定義資料
+    # 8. 查詢角色定義資料
     role_query = session.query(RoleEntity).all()
     role_to_name = {_.id: _.name for _ in role_query}
 
-    # 10. 整理資料
+    # 9. 整理資料
     message_qdict = message_user.__dict__
     message_qdict['role'] = role_to_name.get(Role.USER.value)
     message_adict = message_ai.__dict__
