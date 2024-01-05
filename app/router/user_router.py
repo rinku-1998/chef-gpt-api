@@ -37,7 +37,7 @@ def registrations(req: RegistrationReq,
                           email=req.email,
                           password_hash=password_helper.hash_password(
                               req.password),
-                          create_time=time_util.current_time)
+                          create_time=time_util.current_time())
 
     session.add(user_new)
     session.commit()
