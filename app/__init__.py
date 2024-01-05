@@ -35,9 +35,12 @@ def create_app() -> FastAPI:
     # 3. 路由
     from app.router.user_router import router as user_router
     from app.router.conversation_router import router as conversation_router
+    from fastapi import APIRouter
 
-    app.include_router(user_router)
-    app.include_router(conversation_router)
+    root_router = APIRouter(prefix='/api/v1')
+    root_router.include_router(user_router)
+    root_router.include_router(conversation_router)
+    app.include_router(root_router)
 
     # 4. 例外攔截
     app = attach_exception_handlers(app)
