@@ -20,7 +20,6 @@ poetry install
 
 ```
 DB_URL: "postgresql://<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>"
-
 ```
 
 3. 啟動服務
