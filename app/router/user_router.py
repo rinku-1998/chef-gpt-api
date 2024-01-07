@@ -58,7 +58,7 @@ def login(req: LoginReq, session: Session = Depends(get_session)):
     # 1. 檢查使用者是否存在
     user_query = session.query(UserEntity).filter_by(email=req.email).first()
     if not user_query:
-        raise UserNotExistException
+        raise UserNotExistException(req.email)
 
     # 2. 檢查密碼
     if not password_helper.verify_password(req.password,

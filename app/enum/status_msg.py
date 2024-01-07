@@ -9,7 +9,7 @@ class StatusMsg(Enum):
     # 400
     ITEM_NOT_EXIST: str = '物件不存在'
     USER_EXIST: str = '使用者已存在'
-    USER_NOT_EXIST: str = '使用者已存在'
+    USER_NOT_EXIST: str = '使用者不存在'
     PASSWORD_NOT_STRONG: str = '密碼強度不足'
 
     # 401
