@@ -16,7 +16,7 @@ poetry install
 ```
 
 2. 設定環境
-   在專案目錄下新增一個 `.env.yml` 檔，並在裡面輸入：
+   在專案目錄下新增一個 `env.yml` 檔，並在裡面輸入：
 
 ```
 DB_URL: "postgresql://<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>"
