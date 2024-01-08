@@ -2,6 +2,10 @@
 
 Chef GPT API
 
+## 協作專案
+
+Web Repo: [pock999/chef-gpt-web](https://github.com/pock999/chef-gpt-web)
+
 ## 環境
 
 - Python 3.12
