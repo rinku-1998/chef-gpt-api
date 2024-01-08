@@ -3,6 +3,7 @@ from app.exception.db_exception import ItemNotExistException
 from app.exception.user_exception import UserExistException, UserNotExistException
 from app.exception.password_exception import PasswordNotStrongException, WrongPasswordException
 from app.exception.token_exception import TokenNotExistException, MissingTokenException
+from app.exception.email_excpetion import EmailPatternNotCorrectException
 from app.model.base_res import BaseRes
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError, HTTPException
@@ -98,6 +99,16 @@ def attach_exception_handlers(app: FastAPI) -> FastAPI:
             exception: ItemNotExistException) -> JSONResponse:
 
         res = BaseRes(msg=StatusMsg.ITEM_NOT_EXIST.value)
+
+        return JSONResponse(jsonable_encoder(res), status_code=400)
+
+    # Email 格式錯誤
+    @app.exception_handler(EmailPatternNotCorrectException)
+    async def email_pattern_not_correct_exception_handler(
+            request: Request,
+            exception: EmailPatternNotCorrectException) -> JSONResponse:
+
+        res = BaseRes(msg=StatusMsg.EMAIL_PATTERN_NOT_CORRECT.value)
 
         return JSONResponse(jsonable_encoder(res), status_code=400)
 

@@ -11,6 +11,7 @@ class StatusMsg(Enum):
     USER_EXIST: str = '使用者已存在'
     USER_NOT_EXIST: str = '使用者不存在'
     PASSWORD_NOT_STRONG: str = '密碼強度不足'
+    EMAIL_PATTERN_NOT_CORRECT: str = 'Email 格式錯誤'
 
     # 401
     TOKEN_MISSING: str = '缺少 Token'
