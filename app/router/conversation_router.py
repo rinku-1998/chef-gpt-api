@@ -231,4 +231,10 @@ def create_message(req: MessageReq,
     message_qa_res = MessageQARes(question=message_qres, answer=message_ares)
     res = BaseRes(data=message_qa_res)
 
+    # NOTE: 2024-01-14 加入隨機休息秒數（0-3秒）模擬真實情況
+    import time
+    import random
+    wait_secs = random.random() * 3
+    time.sleep(wait_secs)
+
     return res
