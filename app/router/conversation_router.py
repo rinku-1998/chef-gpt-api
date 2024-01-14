@@ -60,7 +60,7 @@ def create_conversation(token: Annotated[str | None, Header()] = None,
 
     # 2. 新建資料
     conversation_new = ConversationEntity(user_id=user_id,
-                                          title='',
+                                          title=None,
                                           create_time=time_util.current_time())
     session.add(conversation_new)
     session.commit()
