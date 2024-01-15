@@ -36,7 +36,8 @@ def get_conversations(token: Annotated[str | None, Header()] = None,
         ConversationEntity.id).filter_by(user_id=user_id).count()
     offset = 0 if page == 1 else page * count
     conversation_query = session.query(ConversationEntity).filter_by(
-        user_id=user_id).limit(count).offset(offset).all()
+        user_id=user_id).order_by(ConversationEntity.create_time.desc()).limit(
+            count).offset(offset).all()
 
     # 3. 整理資料
     conversation_reses = [
