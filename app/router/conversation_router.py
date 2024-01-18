@@ -34,7 +34,7 @@ def get_conversations(token: Annotated[str | None, Header()] = None,
     # 2. 查詢對話列表
     conversation_count = session.query(
         ConversationEntity.id).filter_by(user_id=user_id).count()
-    offset = 0 if page == 1 else page * count
+    offset = 0 if page == 1 else (page - 1) * count
     conversation_query = session.query(ConversationEntity).filter_by(
         user_id=user_id).order_by(ConversationEntity.create_time.desc()).limit(
             count).offset(offset).all()
@@ -156,7 +156,7 @@ def get_messages(conversation_id: int,
     # 3. 查詢訊息列表
     message_count = session.query(
         MessageEntity.id).filter_by(conversation_id=conversation_id).count()
-    offset = 0 if page == 1 else page * count
+    offset = 0 if page == 1 else (page - 1) * count
     message_query = session.query(
         MessageEntity.id, MessageEntity.content, MessageEntity.create_time,
         RoleEntity.name.label('role')).join(
