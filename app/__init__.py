@@ -4,6 +4,7 @@ from app.extension import SessionLocal
 from app.exception_handler import attach_exception_handlers
 from app.cors_middleware import add_cors_middleware
 from app.logging_handler import format_record, InterceptHandler
+from app.service import chat_service
 from fastapi import FastAPI
 from loguru import logger
 
@@ -47,5 +48,9 @@ def create_app() -> FastAPI:
 
     # 5. Middleware
     app = add_cors_middleware(app)
+
+    # 6. 聊天模型
+    chatbot = chat_service.build_chatbot()
+    app.state.chatbot = chatbot
 
     return app

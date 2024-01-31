@@ -6,15 +6,21 @@ authors = ["Rinku <shark4rkcoding@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-fastapi = "^0.108.0"
-pydantic = "^2.5.3"
-uvicorn = {extras = ["standard"], version = "^0.25.0"}
-sqlalchemy = "^2.0.25"
+python = ">=3.9,<3.12"
+fastapi = "^0.109.0"
+uvicorn = "^0.27.0.post1"
+pydantic = "^2.6.0"
 psycopg2-binary = "^2.9.9"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-bcrypt = "4.0.1"
 loguru = "^0.7.2"
+langchain = "^0.1.4"
+torch = "^2.2.0"
+torchvision = "^0.17.0"
+torchaudio = "^2.2.0"
+llama-cpp-python = "^0.2.37"
+unstructured = {extras = ["md"], version = "^0.12.3"}
+sentence-transformers = "^2.3.1"
+qdrant-client = "^1.7.1"
 
 
 [build-system]

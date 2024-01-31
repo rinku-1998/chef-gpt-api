@@ -13,9 +13,9 @@ from app.model.message_qa_res import MessageQARes
 from app.model.title_res import TitleRes
 from app.model.page_res import PageRes
 from app.helper.db_helper import get_session
-from app.service import user_service
+from app.service import chat_service, user_service
 from app.util import time_util
-from fastapi import APIRouter, Header, Depends
+from fastapi import APIRouter, Header, Depends, Request
 from sqlalchemy.orm import Session
 from typing import Annotated, Optional
 
@@ -178,7 +178,8 @@ def get_messages(conversation_id: int,
 
 
 @router.post('/messages', response_model=BaseRes[MessageQARes])
-def create_message(req: MessageReq,
+def create_message(request: Request,
+                   req: MessageReq,
                    token: Annotated[Optional[str], Header()] = None,
                    session: Session = Depends(get_session)):
 
@@ -202,12 +203,33 @@ def create_message(req: MessageReq,
                                  create_time=time_util.current_time())
 
     # 4. 推論 LLM
-    pass
+    # 取得現有資料
+    chatbot = request.app.state.chatbot
+    chatbot.memory.clear()
+
+    # 還原對話紀錄
+    message_queries = session.query(MessageEntity).filter_by(
+        conversation_id=req.conversation_id).order_by(
+            MessageEntity.create_time.asc()).all()
+    answer_idxs = [
+        i for i, _ in enumerate(message_queries) if _.role_id == Role.AI.value
+    ]
+    for idx in answer_idxs:
+        if idx - 1 < 0:
+            continue
+
+        chatbot.memory.save_context(
+            {'input': message_queries[idx - 1].content},
+            {'answer': message_queries[idx].content})
+
+    # 推論
+    result = chatbot({'question': req.question})
+    answer = result['answer']
 
     # 5. 新建 AI 訊息
     message_ai = MessageEntity(conversation_id=req.conversation_id,
                                role_id=Role.AI.value,
-                               content='AI 回覆測試訊息',
+                               content=answer,
                                create_time=time_util.current_time())
 
     # 6. 產生標題
@@ -233,11 +255,5 @@ def create_message(req: MessageReq,
     message_ares = MessageRes.model_validate(message_adict)
     message_qa_res = MessageQARes(question=message_qres, answer=message_ares)
     res = BaseRes(data=message_qa_res)
-
-    # NOTE: 2024-01-14 加入隨機休息秒數（0-3秒）模擬真實情況
-    import time
-    import random
-    wait_secs = random.random() * 3
-    time.sleep(wait_secs)
 
     return res
