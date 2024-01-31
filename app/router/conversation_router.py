@@ -17,15 +17,15 @@ from app.service import user_service
 from app.util import time_util
 from fastapi import APIRouter, Header, Depends
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, Optional
 
 router = APIRouter(tags=['conversation'])
 
 
 @router.get('/conversations', response_model=BaseRes[ConversationPageRes])
-def get_conversations(token: Annotated[str | None, Header()] = None,
-                      page: None | int = 1,
-                      count: None | int = 10,
+def get_conversations(token: Annotated[Optional[str], Header()] = None,
+                      page: Optional[int] = 1,
+                      count: Optional[int] = 10,
                       session: Session = Depends(get_session)):
 
     # 1. 查詢使用者
@@ -53,7 +53,8 @@ def get_conversations(token: Annotated[str | None, Header()] = None,
 
 
 @router.post('/conversations', response_model=BaseRes[ConversationRes])
-def create_conversation(token: Annotated[str | None, Header()] = None,
+def create_conversation(token: Annotated[Optional[str],
+                                         Header()] = None,
                         session: Session = Depends(get_session)):
 
     # 1. 查詢使用者
@@ -76,7 +77,8 @@ def create_conversation(token: Annotated[str | None, Header()] = None,
 
 @router.delete('/conversations/{conversation_id}', response_model=BaseRes)
 def delete_conversation(conversation_id: int,
-                        token: Annotated[str | None, Header()] = None,
+                        token: Annotated[Optional[str],
+                                         Header()] = None,
                         session: Session = Depends(get_session)):
 
     # 1. 查詢使用者
@@ -109,7 +111,7 @@ def delete_conversation(conversation_id: int,
 
 @router.get('/titles/{conversation_id}', response_model=BaseRes[TitleRes])
 def get_title(conversation_id: int,
-              token: Annotated[str | None, Header()] = None,
+              token: Annotated[Optional[str], Header()] = None,
               session: Session = Depends(get_session)):
 
     # 1. 查詢使用者
@@ -135,9 +137,9 @@ def get_title(conversation_id: int,
 @router.get('/messages/{conversation_id}',
             response_model=BaseRes[MessagePageRes])
 def get_messages(conversation_id: int,
-                 page: int | None = 1,
-                 count: int | None = 10,
-                 token: Annotated[str | None, Header()] = None,
+                 page: Optional[int] = 1,
+                 count: Optional[int] = 10,
+                 token: Annotated[Optional[str], Header()] = None,
                  session: Session = Depends(get_session)):
 
     # 1. 查詢使用者
@@ -177,7 +179,7 @@ def get_messages(conversation_id: int,
 
 @router.post('/messages', response_model=BaseRes[MessageQARes])
 def create_message(req: MessageReq,
-                   token: Annotated[str | None, Header()] = None,
+                   token: Annotated[Optional[str], Header()] = None,
                    session: Session = Depends(get_session)):
 
     # 1. 查詢使用者

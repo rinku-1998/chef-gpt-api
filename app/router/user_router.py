@@ -14,7 +14,7 @@ from app.model.login_res import LoginRes
 from app.util import uuid_util, time_util
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, Optional
 
 router = APIRouter(tags=['user'])
 
@@ -95,7 +95,7 @@ def login(req: LoginReq, session: Session = Depends(get_session)):
 
 
 @router.delete('/logout', response_model=BaseRes)
-def logout(token: Annotated[str | None, Header()] = None,
+def logout(token: Annotated[Optional[str], Header()] = None,
            session: Session = Depends(get_session)):
 
     # 1. 檢查 Token 是否為空
