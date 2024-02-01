@@ -233,7 +233,15 @@ def create_message(request: Request,
                                create_time=time_util.current_time())
 
     # 6. 產生標題
-    pass
+    if conversation_query.title is None:
+        llm = request.app.state.llm
+        prompt_title = f'{req.question}?{answer},請根據以上內容產生30字以內的標題'
+        title = llm(prompt_title)
+
+        # 儲存標題
+        title = title[:128]
+        conversation_query.title = title
+        session.commit()
 
     # 7. 寫入資料庫
     session.add_all([message_user, message_ai])

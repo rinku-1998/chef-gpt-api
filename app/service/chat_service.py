@@ -3,7 +3,7 @@ from app.enum.role import Role
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
-from langchain.document_loaders import DirectoryLoader
+from langchain.document_loaders import DirectoryLoader, UnstructuredMarkdownLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import LlamaCpp
 from langchain.memory import ConversationBufferMemory
@@ -15,7 +15,7 @@ from langchain_core.documents import Document
 
 def load_doc(doc_dir: str):
 
-    loader = DirectoryLoader(doc_dir)
+    loader = DirectoryLoader(doc_dir, loader_cls=UnstructuredMarkdownLoader)
     docs = loader.load()
 
     text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
@@ -47,11 +47,12 @@ def build_docstore(url: str, docs: list[Document], collection_name: str,
     return doc_store
 
 
-def build_llm(model_path: str) -> LlamaCpp:
+def build_llm() -> LlamaCpp:
 
     n_gpu_layers = 32
     n_batch = 512
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    model_path = r'weight/Taiwan-LLM-7B-v2.0-chat-Q5_1.gguf'
 
     llm = LlamaCpp(
         model_path=model_path,
@@ -84,7 +85,7 @@ def build_conversation(llm: LlamaCpp, doc_store,
     conversation = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=doc_store.as_retriever(),
-        return_source_documents=True,
+        return_source_documents=False,
         memory=memory,
         verbose=False)
 
@@ -94,7 +95,7 @@ def build_conversation(llm: LlamaCpp, doc_store,
 # def build_chatbot(doc_dir: str, embedding_model_path: str, vectordb_url: str,
 #                   llm_model_path: str, memory_key: str,
 #                   answer_key: str) -> ConversationalRetrievalChain:
-def build_chatbot() -> ConversationalRetrievalChain:
+def build_chatbot(llm: LlamaCpp) -> ConversationalRetrievalChain:
 
     # 1. 載入資料（知識文本）
     doc_dir = r'data/recipe'
@@ -110,11 +111,7 @@ def build_chatbot() -> ConversationalRetrievalChain:
     doc_store = build_docstore(qdrant_url, docs, collection_name,
                                embedding_model)
 
-    # 4. 建立 LLM
-    llm_model_path = r'weight/Taiwan-LLM-7B-v2.0-chat-Q5_1.gguf'
-    llm = build_llm(llm_model_path)
-
-    # 5. 建立有記憶的對話式問答
+    # 4. 建立有記憶的對話式問答
     memory = init_memory()
     conversation = build_conversation(llm, doc_store, memory)
 

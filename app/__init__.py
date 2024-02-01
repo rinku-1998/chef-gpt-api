@@ -50,7 +50,9 @@ def create_app() -> FastAPI:
     app = add_cors_middleware(app)
 
     # 6. 聊天模型
-    chatbot = chat_service.build_chatbot()
+    llm = chat_service.build_llm()
+    chatbot = chat_service.build_chatbot(llm)
+    app.state.llm = llm
     app.state.chatbot = chatbot
 
     return app
