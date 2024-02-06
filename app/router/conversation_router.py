@@ -205,6 +205,8 @@ def create_message(request: Request,
     # 4. 推論 LLM
     # 取得現有資料
     chatbot = request.app.state.chatbot
+
+    # 清除記憶
     chatbot.memory.clear()
 
     # 還原對話紀錄
@@ -220,11 +222,13 @@ def create_message(request: Request,
 
         chatbot.memory.save_context(
             {'input': message_queries[idx - 1].content},
-            {'answer': message_queries[idx].content})
-
+            {'output': message_queries[idx].content})
+        
     # 推論
-    result = chatbot({'question': req.question})
-    answer = result['answer']
+    result = chatbot.invoke({'input': req.question})
+    answer = result['response']
+    answer = answer.replace('ASSISTANT:', '')
+    answer = answer.replace('\\n', '\n')
 
     # 5. 新建 AI 訊息
     message_ai = MessageEntity(conversation_id=req.conversation_id,
@@ -235,8 +239,10 @@ def create_message(request: Request,
     # 6. 產生標題
     if conversation_query.title is None:
         llm = request.app.state.llm
-        prompt_title = f'{req.question}?{answer},請根據以上內容產生30字以內的標題'
+        prompt_title = f'請用30個字以內產生下列這段對話在講的主題, 問題:{req.question}? 答案:{answer}'
         title = llm(prompt_title)
+        title = title.replace('ASSISTANT:', '')
+        title = title.replace('\\n', '\n')
 
         # 儲存標題
         title = title[:128]

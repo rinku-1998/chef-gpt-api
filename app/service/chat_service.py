@@ -2,7 +2,7 @@ from app.db.message_entity import MessageEntity
 from app.enum.role import Role
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.chains import ConversationalRetrievalChain
+from langchain.chains import ConversationalRetrievalChain, ConversationChain, LLMChain
 from langchain.document_loaders import DirectoryLoader, UnstructuredMarkdownLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.llms import LlamaCpp
@@ -53,6 +53,7 @@ def build_llm() -> LlamaCpp:
     n_batch = 512
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     model_path = r'weight/Taiwan-LLM-7B-v2.0-chat-Q5_1.gguf'
+    # model_path = r'mistralai/Mistral-7B-v0.1'
 
     llm = LlamaCpp(
         model_path=model_path,
@@ -62,57 +63,40 @@ def build_llm() -> LlamaCpp:
         f16_kv=
         True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
-        max_token=2000,
-        verbose=True,
+        max_token=3000,
+        verbose=False,
     )
 
     return llm
 
 
-def init_memory(memory_key: str = 'chat_history',
-                output_key: str = 'answer') -> ConversationBufferMemory:
+def build_conversation(llm: LlamaCpp) -> ConversationalRetrievalChain:
 
-    memory = ConversationBufferMemory(memory_key=memory_key,
-                                      output_key=output_key,
-                                      return_messages=True)
-
-    return memory
-
-
-def build_conversation(llm: LlamaCpp, doc_store,
-                       memory) -> ConversationalRetrievalChain:
-
-    conversation = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=doc_store.as_retriever(),
-        return_source_documents=False,
-        memory=memory,
-        verbose=False)
+    conversation = ConversationChain(
+        llm=llm, memory=ConversationBufferMemory(return_messages=True))
 
     return conversation
 
 
-# def build_chatbot(doc_dir: str, embedding_model_path: str, vectordb_url: str,
-#                   llm_model_path: str, memory_key: str,
-#                   answer_key: str) -> ConversationalRetrievalChain:
 def build_chatbot(llm: LlamaCpp) -> ConversationalRetrievalChain:
 
+    # NOTE: 2024-02-06 暫時拿掉文本搜尋
     # 1. 載入資料（知識文本）
-    doc_dir = r'data/recipe'
-    docs = load_doc(doc_dir)
+    # doc_dir = r'data/recipe'
+    # docs = load_doc(doc_dir)
 
-    # 2. 建立 Embedding Model
-    embedding_model_path = r'sentence-transformers/all-MiniLM-L6-v2'
-    embedding_model = build_embedding(embedding_model_path)
+    # # 2. 建立 Embedding Model
+    # # embedding_model_path = r'sentence-transformers/all-MiniLM-L6-v2'
+    # embedding_model_path = r'shibing624/text2vec-base-chinese'
+    # embedding_model = build_embedding(embedding_model_path)
 
-    # 3. 建立向量資料庫
-    qdrant_url = r'http://localhost:6333'
-    collection_name = 'recipe'
-    doc_store = build_docstore(qdrant_url, docs, collection_name,
-                               embedding_model)
+    # # 3. 建立向量資料庫
+    # qdrant_url = r'http://localhost:6333'
+    # collection_name = 'recipe'
+    # doc_store = build_docstore(qdrant_url, docs, collection_name,
+    #                            embedding_model)
 
     # 4. 建立有記憶的對話式問答
-    memory = init_memory()
-    conversation = build_conversation(llm, doc_store, memory)
+    conversation = build_conversation(llm)
 
     return conversation
