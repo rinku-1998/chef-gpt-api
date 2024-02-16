@@ -1,3 +1,4 @@
+import re
 from app.db.conversation_entity import ConversationEntity
 from app.db.message_entity import MessageEntity
 from app.db.role_entity import RoleEntity
@@ -237,17 +238,21 @@ def create_message(request: Request,
                                create_time=time_util.current_time())
 
     # 6. 產生標題
-    # if conversation_query.title is None:
-    #     llm = request.app.state.llm
-    #     prompt_title = f'下面的對話是一個機器人與用戶的對談內容, 請根據這些對話產生這個機器人的功能, 字數15字以內, 問題:{req.question}? 答案:{answer}'
-    #     title = llm(prompt_title)
-    #     title = title.replace('ASSISTANT:', '')
-    #     title = title.replace('\\n', '\n')
+    if conversation_query.title is None:
+        llm = request.app.state.llm
+        prompt_title = f'''
+        {req.question}
+        {answer}
+        請根據這段對話產生一個合適的標題
+        '''
+        title = llm(prompt_title)
+        title = chat_service.extract_answer(title)
+        title = re.sub(r'[「」]', '', title)
 
-    #     # 儲存標題
-    #     title = title[:128]
-    #     conversation_query.title = title
-    #     session.commit()
+        # 儲存標題
+        title = title[:128]
+        conversation_query.title = title
+        session.commit()
 
     # 7. 寫入資料庫
     session.add_all([message_user, message_ai])
