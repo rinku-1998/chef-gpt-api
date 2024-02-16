@@ -1,4 +1,5 @@
 import re
+from app.extension import config
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
@@ -12,9 +13,10 @@ from langchain_core.documents import Document
 from langchain.prompts.chat import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 
 
-def load_doc(doc_dir: str):
+def load_doc():
 
-    loader = DirectoryLoader(doc_dir, loader_cls=UnstructuredMarkdownLoader)
+    loader = DirectoryLoader(config.DOC_DIR,
+                             loader_cls=UnstructuredMarkdownLoader)
     docs = loader.load()
 
     text_splitter = CharacterTextSplitter(chunk_size=256, chunk_overlap=50)
@@ -23,24 +25,24 @@ def load_doc(doc_dir: str):
     return docs
 
 
-def build_embedding(model_path: str) -> HuggingFaceEmbeddings:
+def build_embedding() -> HuggingFaceEmbeddings:
 
-    model_kwargs = {'device': 'mps'}
+    model_kwargs = {'device': config.EMB_DEVICE}
     encode_kwargs = {'normalize_embeddings': True}
-    embeddings = HuggingFaceEmbeddings(model_name=model_path,
+    embeddings = HuggingFaceEmbeddings(model_name=config.EMB_MODEL_NAME,
                                        model_kwargs=model_kwargs,
                                        encode_kwargs=encode_kwargs)
 
     return embeddings
 
 
-def build_docstore(url: str, docs: list[Document], collection_name: str,
+def build_docstore(docs: list[Document],
                    embeddings: HuggingFaceEmbeddings) -> list[Document]:
 
     doc_store = Qdrant.from_documents(docs,
                                       embeddings,
-                                      url=url,
-                                      collection_name=collection_name,
+                                      url=config.QDRANT_URL,
+                                      collection_name=config.COLLECTION_NAME,
                                       force_recreate=True)
 
     return doc_store
@@ -52,12 +54,10 @@ def build_llm() -> LlamaCpp:
     n_batch = 512
     n_ctx = 2048
     max_token = 0
-    # model_path = r'weight/llama-2-7b-chat.Q5_0.gguf'
-    model_path = r'weight/chinese-alpaca-2-7b.Q5_0.gguf'
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
     llm = LlamaCpp(
-        model_path=model_path,
+        model_path=config.LLM_MODEL_PATH,
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
         n_ctx=n_ctx,
@@ -65,7 +65,7 @@ def build_llm() -> LlamaCpp:
         True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
         max_token=max_token,
-        temperature=0.2,
+        temperature=config.TEMPERATURE,
         verbose=False,
     )
 
@@ -107,20 +107,14 @@ def build_conversation(llm: LlamaCpp,
 
 def build_chatbot(llm: LlamaCpp) -> ConversationalRetrievalChain:
 
-    # NOTE: 2024-02-06 暫時拿掉文本搜尋
-    # 1. 載入資料（知識文本）
-    doc_dir = r'data/recipe'
-    docs = load_doc(doc_dir)
+    # 1. 載入資料（知識文本
+    docs = load_doc()
 
     # 2. 建立 Embedding Model
-    embedding_model_path = r'shibing624/text2vec-base-chinese'
-    embedding_model = build_embedding(embedding_model_path)
+    embedding_model = build_embedding()
 
     # 3. 建立向量資料庫
-    qdrant_url = r'http://localhost:6333'
-    collection_name = 'recipe'
-    doc_store = build_docstore(qdrant_url, docs, collection_name,
-                               embedding_model)
+    doc_store = build_docstore(docs, embedding_model)
 
     # 4. 建立有記憶的對話式問答
     conversation = build_conversation(llm, doc_store.as_retriever())
