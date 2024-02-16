@@ -162,3 +162,5 @@ cython_debug/
 # Repo
 .venv/
 env.yml
+data/recipe/
+weight/*.gguf
