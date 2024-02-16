@@ -3,12 +3,12 @@ from app.extension import config
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
-from langchain.document_loaders import DirectoryLoader, UnstructuredMarkdownLoader
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.llms import LlamaCpp
+from langchain_community.document_loaders import DirectoryLoader, UnstructuredMarkdownLoader
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.llms import LlamaCpp
 from langchain.memory import ConversationBufferMemory
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Qdrant
+from langchain_community.vectorstores import Qdrant
 from langchain_core.documents import Document
 from langchain.prompts.chat import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 
