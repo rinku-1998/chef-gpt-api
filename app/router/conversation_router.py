@@ -209,7 +209,7 @@ def create_message(request: Request,
     # 清除記憶
     chatbot.memory.clear()
 
-    # 還原對話紀錄
+    # 還原對話紀錄到 Memory
     message_queries = session.query(MessageEntity).filter_by(
         conversation_id=req.conversation_id).order_by(
             MessageEntity.create_time.asc()).all()
@@ -221,14 +221,14 @@ def create_message(request: Request,
             continue
 
         chatbot.memory.save_context(
-            {'input': message_queries[idx - 1].content},
-            {'output': message_queries[idx].content})
-        
+            {'question': message_queries[idx - 1].content},
+            {'answer': message_queries[idx].content})
+
     # 推論
-    result = chatbot.invoke({'input': req.question})
-    answer = result['response']
-    answer = answer.replace('ASSISTANT:', '')
-    answer = answer.replace('\\n', '\n')
+    result = chatbot.invoke({'question': req.question})
+
+    # 擷取輸出文字
+    answer = chat_service.extract_answer(result['answer'])
 
     # 5. 新建 AI 訊息
     message_ai = MessageEntity(conversation_id=req.conversation_id,
@@ -237,17 +237,17 @@ def create_message(request: Request,
                                create_time=time_util.current_time())
 
     # 6. 產生標題
-    if conversation_query.title is None:
-        llm = request.app.state.llm
-        prompt_title = f'請用30個字以內產生下列這段對話在講的主題, 問題:{req.question}? 答案:{answer}'
-        title = llm(prompt_title)
-        title = title.replace('ASSISTANT:', '')
-        title = title.replace('\\n', '\n')
+    # if conversation_query.title is None:
+    #     llm = request.app.state.llm
+    #     prompt_title = f'下面的對話是一個機器人與用戶的對談內容, 請根據這些對話產生這個機器人的功能, 字數15字以內, 問題:{req.question}? 答案:{answer}'
+    #     title = llm(prompt_title)
+    #     title = title.replace('ASSISTANT:', '')
+    #     title = title.replace('\\n', '\n')
 
-        # 儲存標題
-        title = title[:128]
-        conversation_query.title = title
-        session.commit()
+    #     # 儲存標題
+    #     title = title[:128]
+    #     conversation_query.title = title
+    #     session.commit()
 
     # 7. 寫入資料庫
     session.add_all([message_user, message_ai])
