@@ -77,13 +77,14 @@ def build_conversation(llm: LlamaCpp,
 
     # 1. 定義 Prompt
     system_template = r"""
-    你現在是一個擁有10年經驗的創意料理家, 請根據下面的資訊給出一個簡短的答案, 並使用中文回答, 如果不知道的話就回答「窩不知道 peko」
+    你現在是一個擁有10年經驗的創意料理家, 請根據下面的資訊給出一個簡短的答案, 如果不知道的話就回答「窩不知道 peko」
     --------------
     {context}
     --------------
     """
     human_template = r"""
     問題: {question}
+    使用中文來回答問題
     回答:"""
 
     # 2. 設定聊天模板
@@ -139,7 +140,9 @@ def extract_answer(output: str) -> str:
     # 3. 處理換行符號
     output = output.replace('\\n', '\n')
     output = output.replace('\n\n', '\n')
-    if output.startswith('\n\n'):
-        output = output[2:]
+    output = re.sub(r'^[\ \n]+', '', output)
+
+    # 4. 處理多餘文字
+    output = output.replace('--------------', '')
 
     return output
