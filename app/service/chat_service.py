@@ -53,7 +53,6 @@ def build_llm() -> LlamaCpp:
     n_gpu_layers = 32
     n_batch = 512
     n_ctx = 2048
-    max_token = 0
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
     llm = LlamaCpp(
@@ -64,7 +63,6 @@ def build_llm() -> LlamaCpp:
         f16_kv=
         True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
-        max_token=max_token,
         temperature=config.TEMPERATURE,
         verbose=False,
     )
