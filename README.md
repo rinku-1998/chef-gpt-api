@@ -11,16 +11,18 @@ Web Repo: [pock999/chef-gpt-web](https://github.com/pock999/chef-gpt-web)
 - Python 3.9.18
 - Docker 20.10.20
 
-
 ## 使用指南
+
 1. 啟動 PostgreSQL 服務
 
 使用 Docker 啟動 PostgreSQL
+
 ```shell
 . script/start_postgresql.sh
 ```
 
 設定資料庫帳號密碼
+
 ```shell
 # 1. 進入容器內
 sudo docker exec -it postgres /bin/bash
@@ -43,6 +45,7 @@ CREATE DATABASE 'chefgpt' WITH OWNER = chef;
 2. 啟動 Qdrant 服務
 
 使用 Docker 啟動 Qdrant
+
 ```shell
 . script/start_qdrant.sh
 ```
@@ -55,12 +58,15 @@ poetry install
 ```
 
 4. 設定環境
+
    複製一個 `env_default.yml` 並改名為 `env.yml`，修改裡面的內容。
 
 5. 準備語料
+
 預設是使用 [Anduin2017/HowToCook](https://github.com/Anduin2017/HowToCook) 的食譜，經過簡轉繁與移除備註資料，將處理後的 Markdown 放到 data/recipe 資料夾內。
 
 6. 下載 LLM 權重
+
 使用 TheBloke 釋出的 [Chinese-Alpaca-2](https://huggingface.co/TheBloke/Chinese-Alpaca-2-7B-GGUF) GGUF 模型，也可以替換成其他 llama2 模型。
 
 7. 啟動服務
