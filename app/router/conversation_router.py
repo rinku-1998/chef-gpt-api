@@ -247,7 +247,7 @@ def create_message(request: Request,
         '''
         title = llm(prompt_title)
         title = chat_service.extract_answer(title)
-        title = re.sub(r'[「」]', '', title)
+        title = chat_service.extract_title(title)
 
         # 儲存標題
         title = title[:128]

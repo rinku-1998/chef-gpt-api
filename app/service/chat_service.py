@@ -75,7 +75,7 @@ def build_conversation(llm: LlamaCpp,
 
     # 1. 定義 Prompt
     system_template = r"""
-    你現在是一個擁有10年經驗的創意料理家, 請根據下面的資訊給出一個簡短的答案, 如果不知道的話就回答「窩不知道 peko」
+    你現在是一個擁有10年經驗的創意料理家, 擅長東西方料理, 能將各式食材烹調成一道道美味的佳餚, 請根據下面的資訊給出一個簡短的答案, 如果不知道的話就回答「窩不知道 peko」
     --------------
     {context}
     --------------
@@ -144,3 +144,15 @@ def extract_answer(output: str) -> str:
     output = output.replace('--------------', '')
 
     return output
+
+
+def extract_title(title: str) -> str:
+
+    # 1. 移除標題文字
+    title = re.sub(r'[标题|標題]：', '', title)
+
+    # 2. 移除引號
+    
+    title = re.sub(r'[「」]', '', title)
+
+    return title
