@@ -36,11 +36,13 @@ def create_app() -> FastAPI:
     # 3. 路由
     from app.router.user_router import router as user_router
     from app.router.conversation_router import router as conversation_router
+    from app.router.line_router import router as line_router
     from fastapi import APIRouter
 
     root_router = APIRouter(prefix='/api/v1')
     root_router.include_router(user_router)
     root_router.include_router(conversation_router)
+    root_router.include_router(line_router)
     app.include_router(root_router)
 
     # 4. 例外攔截
@@ -52,7 +54,7 @@ def create_app() -> FastAPI:
     # 6. 聊天模型
     llm = chat_service.build_llm()
     chatbot = chat_service.build_chatbot(llm)
-    app.state.llm = llm
+    # app.state.llm = llm
     app.state.chatbot = chatbot
 
     return app

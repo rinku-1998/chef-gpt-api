@@ -21,6 +21,10 @@ class Config():
     LLM_MODEL_PATH = 'weight/chinese-alpaca-2-7b.Q5_0.gguf'
     TEMPERATURE = 0.2
 
+    # 5. LINE Message API
+    ACCESS_TOKEN = ''
+    CHANNEL_SECRET = ''
+
     def __init__(self, config_path=r'env.yml') -> None:
 
         # 1. 讀取 yaml 檔
